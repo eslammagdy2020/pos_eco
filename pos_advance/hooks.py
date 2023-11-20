@@ -152,6 +152,9 @@ app_license = "MIT"
 
 doctype_js = {
     "POS Closing Entry": "public/js/pos_closing_entry.js",
+    "Purchase Order": "public/js/purchase_order.js",
+    "Purchase Invoice": "public/js/purchase_invoice.js",
+    "Supplier Quotation": "public/js/supplier_quotation.js",
 }
 # before_tests = "pos_advance.install.before_tests"
 

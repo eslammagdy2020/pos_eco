@@ -1,0 +1,13 @@
+{
+"js/point-of-sale-advance.min.js": [
+		"public/js/pos_item_selector.js",
+		"public/js/pos_item_cart.js",
+		"public/js/pos_item_details.js",
+		"public/js/pos_number_pad.js",
+		"public/js/pos_payment.js",
+		"public/js/pos_past_order_list.js",
+		"public/js/pos_past_order_summary.js",
+		"public/js/pos_controller.js"
+	],
+
+}

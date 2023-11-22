@@ -42,7 +42,7 @@ page_js = {"point-of-sale" : "public/js/point_of_sales.js"}
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -56,8 +56,8 @@ page_js = {"point-of-sale" : "public/js/point_of_sales.js"}
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "pos_advance.utils.jinja_methods",
-#	"filters": "pos_advance.utils.jinja_filters"
+# 	"methods": "pos_advance.utils.jinja_methods",
+# 	"filters": "pos_advance.utils.jinja_filters"
 # }
 
 # Installation
@@ -101,11 +101,11 @@ override_whitelisted_methods = {
 	"erpnext.selling.page.point_of_sale.point_of_sale.get_items" : "pos_advance.utils.get_items"
 }
 # permission_query_conditions = {
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -113,7 +113,7 @@ override_whitelisted_methods = {
 # Override standard doctype classes
 
 # override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
+# 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -121,51 +121,57 @@ override_whitelisted_methods = {
 # Hook on document methods and events
 
 # doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
 # }
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
-#	"all": [
-#		"pos_advance.tasks.all"
-#	],
-#	"daily": [
-#		"pos_advance.tasks.daily"
-#	],
-#	"hourly": [
-#		"pos_advance.tasks.hourly"
-#	],
-#	"weekly": [
-#		"pos_advance.tasks.weekly"
-#	],
-#	"monthly": [
-#		"pos_advance.tasks.monthly"
-#	],
+# 	"all": [
+# 		"pos_advance.tasks.all"
+# 	],
+# 	"daily": [
+# 		"pos_advance.tasks.daily"
+# 	],
+# 	"hourly": [
+# 		"pos_advance.tasks.hourly"
+# 	],
+# 	"weekly": [
+# 		"pos_advance.tasks.weekly"
+# 	],
+# 	"monthly": [
+# 		"pos_advance.tasks.monthly"
+# 	],
 # }
 
 # Testing
 # -------
 
+doctype_js = {
+    "POS Closing Entry": "public/js/pos_closing_entry.js",
+    "Purchase Order": "public/js/purchase_order.js",
+    "Purchase Invoice": "public/js/purchase_invoice.js",
+    "Supplier Quotation": "public/js/supplier_quotation.js",
+}
 # before_tests = "pos_advance.install.before_tests"
 
 # Overriding Methods
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "pos_advance.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "pos_advance.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-#	"Task": "pos_advance.task.get_dashboard_data"
+# 	"Task": "pos_advance.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -191,29 +197,34 @@ override_whitelisted_methods = {
 # --------------------
 
 # user_data_fields = [
-#	{
-#		"doctype": "{doctype_1}",
-#		"filter_by": "{filter_by}",
-#		"redact_fields": ["{field_1}", "{field_2}"],
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_2}",
-#		"filter_by": "{filter_by}",
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_3}",
-#		"strict": False,
-#	},
-#	{
-#		"doctype": "{doctype_4}"
-#	}
+# 	{
+# 		"doctype": "{doctype_1}",
+# 		"filter_by": "{filter_by}",
+# 		"redact_fields": ["{field_1}", "{field_2}"],
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_2}",
+# 		"filter_by": "{filter_by}",
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_3}",
+# 		"strict": False,
+# 	},
+# 	{
+# 		"doctype": "{doctype_4}"
+# 	}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"pos_advance.auth.validate"
+# 	"pos_advance.auth.validate"
 # ]
+
+
+domains = {
+    "POS": "pos_advance.domains.pos",
+}

@@ -26,7 +26,7 @@ app_license = "MIT"
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page /home/beshoy/frappe-bench/apps/pos_advance/pos_advance/pages/point_of_sale/point_of_sale.js
-page_js = {"point-of-sale" : "public/js/point_of_sales.js"}
+page_js = {"point-of-sale": "public/js/point_of_sales.js"}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -98,7 +98,7 @@ page_js = {"point-of-sale" : "public/js/point_of_sales.js"}
 # -----------
 # Permissions evaluated in scripted ways
 override_whitelisted_methods = {
-	"erpnext.selling.page.point_of_sale.point_of_sale.get_items" : "pos_advance.utils.get_items"
+    "erpnext.selling.page.point_of_sale.point_of_sale.get_items": "pos_advance.utils.get_items"
 }
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
@@ -156,6 +156,7 @@ doctype_js = {
     "POS Closing Entry": "public/js/pos_closing_entry.js",
     "Purchase Order": "public/js/purchase_order.js",
     "Purchase Invoice": "public/js/purchase_invoice.js",
+    "Purchase Receipt": "public/js/purchase_receipt.js",
     "Supplier Quotation": "public/js/supplier_quotation.js",
 }
 # before_tests = "pos_advance.install.before_tests"

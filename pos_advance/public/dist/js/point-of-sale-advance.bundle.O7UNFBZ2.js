@@ -2780,9 +2780,14 @@ Return`,
     get_condition_btn_map(after_submission) {
       if (after_submission)
         return [{ condition: true, visible_btns: ["Print Receipt", "Email Receipt", "New Order"] }];
+      var list_details = ["Print Receipt", "Email Receipt"];
+      if (frappe.user.has_role("POS Manager")) {
+        console.log("has role");
+        list_details = ["Print Receipt", "Email Receipt", "Return"];
+      }
       return [
         { condition: this.doc.docstatus === 0, visible_btns: ["Edit Order", "Delete Order"] },
-        { condition: !this.doc.is_return && this.doc.docstatus === 1, visible_btns: ["Print Receipt", "Email Receipt", "Return"] },
+        { condition: !this.doc.is_return && this.doc.docstatus === 1, visible_btns: list_details },
         { condition: this.doc.is_return && this.doc.docstatus === 1, visible_btns: ["Print Receipt", "Email Receipt"] }
       ];
     }
@@ -3506,4 +3511,4 @@ Return`,
     }
   };
 })();
-//# sourceMappingURL=point-of-sale-advance.bundle.ZAMOUGOW.js.map
+//# sourceMappingURL=point-of-sale-advance.bundle.O7UNFBZ2.js.map

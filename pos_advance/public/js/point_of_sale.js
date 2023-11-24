@@ -1,9 +1,9 @@
 frappe.provide('erpnext.PointOfSale');
 
-frappe.pages['point-of-sale Advanced'].on_page_load = function(wrapper) {
+frappe.pages['Eco POS'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: __('Point of Sale'),
+		title: __('Eco POS'),
 		single_column: true
 	});
 

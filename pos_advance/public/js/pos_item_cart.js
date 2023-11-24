@@ -378,7 +378,8 @@ erpnext.PointOfSale.ItemCart = class {
 		const me = this;
 		const frm = me.events.get_frm();
 		let discount = frm.doc.additional_discount_percentage;
-
+		let show =  frappe.user.has_role('POS Manager') 
+		console.log("show" ,show)
 		this.discount_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Discount'),
@@ -401,7 +402,7 @@ erpnext.PointOfSale.ItemCart = class {
 				},
 			},
 			parent: this.$add_discount_elem.find('.add-discount-field'),
-			render_input: false,
+			render_input:show
 		});
 		this.discount_field.toggle_label(false);
 		this.discount_field.set_focus();

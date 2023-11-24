@@ -996,6 +996,8 @@
       const me = this;
       const frm = me.events.get_frm();
       let discount = frm.doc.additional_discount_percentage;
+      let show = frappe.user.has_role("POS Manager");
+      console.log("show", show);
       this.discount_field = frappe.ui.form.make_control({
         df: {
           label: __("Discount"),
@@ -1018,7 +1020,7 @@
           }
         },
         parent: this.$add_discount_elem.find(".add-discount-field"),
-        render_input: false
+        render_input: show
       });
       this.discount_field.toggle_label(false);
       this.discount_field.set_focus();
@@ -2782,7 +2784,6 @@ Return`,
         return [{ condition: true, visible_btns: ["Print Receipt", "Email Receipt", "New Order"] }];
       var list_details = ["Print Receipt", "Email Receipt"];
       if (frappe.user.has_role("POS Manager")) {
-        console.log("has role");
         list_details = ["Print Receipt", "Email Receipt", "Return"];
       }
       return [
@@ -3511,4 +3512,4 @@ Return`,
     }
   };
 })();
-//# sourceMappingURL=point-of-sale-advance.bundle.O7UNFBZ2.js.map
+//# sourceMappingURL=point-of-sale-advance.bundle.LBL6EN4K.js.map

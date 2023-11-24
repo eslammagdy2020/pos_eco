@@ -311,7 +311,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		var list_details = ['Print Receipt', 'Email Receipt']
 		if (frappe.user.has_role('POS Manager')) {
-			console.log("has role")
+			
 			list_details= ['Print Receipt', 'Email Receipt', 'Return']
 		}
 		return [

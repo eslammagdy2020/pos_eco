@@ -98,7 +98,8 @@ page_js = {"point-of-sale": "public/js/point_of_sales.js"}
 # -----------
 # Permissions evaluated in scripted ways
 override_whitelisted_methods = {
-    "erpnext.selling.page.point_of_sale.point_of_sale.get_items": "pos_advance.utils.get_items"
+    "erpnext.selling.page.point_of_sale.point_of_sale.get_items": "pos_advance.utils.get_items" ,
+    "erpnext.stock.utils.scan_barcode": "pos_advance.utils.scan_barcode"
 }
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
@@ -165,7 +166,7 @@ doctype_js = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "pos_advance.event.get_events"
+# 	"erpnext.stock.utils.scan_barcode": "pos_advance.utils.scan_barcode"
 # }
 #
 # each overriding function accepts a `data` argument;

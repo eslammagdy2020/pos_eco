@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2023-12-01 15:20:25.621814",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "price_list",
+  "naming_series",
+  "column_break_hbhto",
+  "price_rule",
+  "section_break_bxzon",
+  "sheet_date",
+  "column_break_zcebk",
+  "start_import",
+  "section_break_qzoek",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hbhto",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "price_rule",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Price Rule",
+   "options": "Pricing Rule"
+  },
+  {
+   "fieldname": "section_break_bxzon",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sheet_date",
+   "fieldtype": "Attach",
+   "label": "Sheet Date"
+  },
+  {
+   "fieldname": "column_break_zcebk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_import",
+   "fieldtype": "Button",
+   "label": "Start Import"
+  },
+  {
+   "depends_on": "eval:doc.sheet_data!=false;",
+   "fieldname": "section_break_qzoek",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Shelf Print Items"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SHILF-"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-12-01 18:29:38.503968",
+ "modified_by": "Administrator",
+ "module": "Pos Advance",
+ "name": "Shelf Print",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

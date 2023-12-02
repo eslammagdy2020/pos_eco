@@ -370,8 +370,7 @@ BarcodeScanResult = Dict[str, Optional[str]]
 def scan_barcode(search_value: str) -> BarcodeScanResult:
     
 	def set_cache(data: BarcodeScanResult):
-		#frappe.throw("Cateche")
-		print("Gatchs")
+		
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
 
 	def get_cache() -> Optional[BarcodeScanResult]:
@@ -382,17 +381,23 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 		return scan_data
 
 	# search barcode no
+	
 	barcode_data = frappe.db.get_value(
 		"Item Barcode",
 		{"barcode": search_value},
 		["barcode", "parent as item_code", "uom"],
 		as_dict=True,
 	)
+
 	if barcode_data:
+
 		_update_item_info(barcode_data)
 		set_cache(barcode_data)
 		return barcode_data
-
+	if not barcode_data :
+		#try cath balance data 
+		print("value to sreach  --" ,search_value)
+		
 	# search serial no
 	serial_no_data = frappe.db.get_value(
 		"Serial No",
@@ -421,12 +426,14 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 
 
 def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
-    if item_code := scan_result.get("item_code"):
-        if item_info := frappe.get_cached_value(
-            "Item",
-            item_code,
-            ["has_batch_no", "has_serial_no"],
-            as_dict=True,
-        ):
-            scan_result.update(item_info)
-    return scan_result
+	if item_code := scan_result.get("item_code"):
+		if item_info := frappe.get_cached_value(
+			"Item",
+			item_code,
+			["has_batch_no", "has_serial_no"],
+			as_dict=True,
+		):
+		
+			scan_result.update(item_info)
+			print(item_info)
+	return scan_result

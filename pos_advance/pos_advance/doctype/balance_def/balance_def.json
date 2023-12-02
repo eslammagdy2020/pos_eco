@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:name1",
+ "creation": "2023-12-02 20:56:30.058334",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name1",
+  "active",
+  "section_break_rklp2",
+  "barcode_min_length",
+  "barcode_max_length",
+  "column_break_hvdu7",
+  "uom_code_length",
+  "balance_code_length",
+  "qty_code_length",
+  "section_break_nzzsr",
+  "barcode_fromat"
+ ],
+ "fields": [
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_rklp2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "barcode_min_length",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Barcode Min Length",
+   "reqd": 1
+  },
+  {
+   "fieldname": "barcode_max_length",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Barcode Max length",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hvdu7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uom_code_length",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UOM Code length",
+   "reqd": 1
+  },
+  {
+   "fieldname": "balance_code_length",
+   "fieldtype": "Data",
+   "label": "Balance Code length",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty_code_length",
+   "fieldtype": "Data",
+   "label": "Qty Code length",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_nzzsr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "ex : b-i-u-q\nb for balance i for item code u for unit of masuer q for qty ",
+   "fieldname": "barcode_fromat",
+   "fieldtype": "Data",
+   "label": "BarCode Fromat",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-12-02 21:28:19.278327",
+ "modified_by": "Administrator",
+ "module": "Pos Advance",
+ "name": "Balance Def",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

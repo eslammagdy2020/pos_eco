@@ -61,7 +61,7 @@ class ShelfPrint(Document):
 		if self.price_rule :
 			if self.price_list != frappe.get_value("Pricing Rule" ,self.price_rule , "for_price_list") :
 				frappe.throw(_( f"""You Set Price List {self.price_list} but Price Rule {self.price_rule} is work for 
-				 {frappe.get_value("Pricing Rule" ,self.price_rule , "for_prcie_list") } """ ))
+				 {frappe.get_value("Pricing Rule" ,self.price_rule , "for_price_list") } """ ))
 				return 0
 			# if price rule apply on  Apply On  tansaction will throw invalid
 			if frappe.get_value("Pricing Rule" ,self.price_rule , "apply_on") == "Transaction" :

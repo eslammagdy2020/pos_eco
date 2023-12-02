@@ -77,8 +77,17 @@ class ShelfPrint(Document):
 				
 			return data 
 
-	def caculate_discount(self) :
-		return 15
+	def caculate_discount(self , item_price) :
+		price = item_price
+		rule = frappe.get_doc("Pricing Rule" ,self.price_rule)
+		if rule.rate_or_discount == "Rate":
+			price = rule.rate
+		if rule.rate_or_discount == "Discount Percentage":
+			price = float(item_price) - ((float(rule.discount_percentage) / 100 ) * float(item_price))
+		if rule.rate_or_discount == "Discount Amount ":
+			price = float(item_price) - float(rule.discount_amount)
+
+		return price
 	def set_item_price(self):
 		if self.items and len(self.items) > 0 :
 			for item in self.items :
@@ -94,4 +103,4 @@ class ShelfPrint(Document):
 					
 					if item.item in codes :
 						item.has_discount = 1
-						item.price_after_discount = self.caculate_discount()
+						item.price_after_discount = self.caculate_discount(item.price)

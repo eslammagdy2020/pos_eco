@@ -5,7 +5,5 @@ frappe.ui.form.on('Shelf Print', {
 	// refresh: function(frm) {
 
 	// }
-	start_import:function(frm){
-		console.log("data")
-	}
+	
 });

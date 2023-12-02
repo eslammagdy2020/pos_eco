@@ -14,8 +14,6 @@
   "price_rule",
   "section_break_bxzon",
   "sheet_date",
-  "column_break_zcebk",
-  "start_import",
   "section_break_qzoek",
   "items"
  ],
@@ -48,15 +46,6 @@
    "label": "Sheet Date"
   },
   {
-   "fieldname": "column_break_zcebk",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "start_import",
-   "fieldtype": "Button",
-   "label": "Start Import"
-  },
-  {
    "depends_on": "eval:doc.sheet_data!=false;",
    "fieldname": "section_break_qzoek",
    "fieldtype": "Section Break"
@@ -76,10 +65,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-01 18:29:38.503968",
+ "modified": "2023-12-02 20:16:37.669834",
  "modified_by": "Administrator",
  "module": "Pos Advance",
  "name": "Shelf Print",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

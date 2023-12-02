@@ -17,6 +17,7 @@ class ShelfPrint(Document):
 		self.validate_price_list()
 		self.get_data_from_file()
 		self.set_item_price()
+		self.validate_price_rule()
 	def get_data_from_file(self):
 		if not self.sheet_date :
 			frappe.throw(_("Please Select excel sheet !"))
@@ -37,6 +38,47 @@ class ShelfPrint(Document):
 				row.uom = item.get("uom")
 				row.code = cell_obj.value
 			# print(workbook)
+
+	def validate_price_rule(self) :
+		if self.price_rule :
+			if self.price_list != frappe.get_value("Pricing Rule" ,self.price_rule , "for_price_list") :
+				frappe.throw(_( f"""You Set Price List {self.price_list} but Price Rule {self.price_rule} is work for 
+				 {frappe.get_value("Pricing Rule" ,self.price_rule , "for_prcie_list") } """ ))
+				return 0
+			# if price rule apply on  Apply On  tansaction will throw invalid
+			if frappe.get_value("Pricing Rule" ,self.price_rule , "apply_on") == "Transaction" :
+					frappe.throw(_(""" Not Allowed To print Shelf Fro transaction """))
+
+	def get_item_to_apply_prcie_rule(self):
+		if self.price_rule :
+			# frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)	
+		    # get all items rice rule applicable for 
+			data  = frappe.cache().get_value(f"posadvanc_{self.price_rule}")
+			if data :
+				print(f"Get Cahched Data , {data}" )
+				return data 
+			if not data :
+				items_codes = frappe.db.sql(f""" 
+				select name FROM `tabItem` WHERE item_group in 
+				(SELECT item_group FROM `tabPricing Rule Item Group` WHERE parent ='{self.price_rule}') 
+				OR 
+				brand in 
+				(SELECT brand FROM `tabPricing Rule Brand` WHERE parent = '{self.price_rule}') 
+				OR 
+				name in 
+				(SELECT item_code from `tabPricing Rule Item Code` WHERE parent= '{self.price_rule}')
+				
+				""")
+				
+				if len(items_codes ) > 0 :
+					data = (i[0] for i in items_codes)
+					frappe.cache().set_value(f"posadvanc_{self.price_rule}", 
+					  [i[0] for i in items_codes ] , expires_in_sec= 120 )
+				
+			return data 
+
+	def caculate_discount(self) :
+		return 15
 	def set_item_price(self):
 		if self.items and len(self.items) > 0 :
 			for item in self.items :
@@ -45,3 +87,11 @@ class ShelfPrint(Document):
 				  ,"price_list_rate" )
 				item.price_after_discount = item.price
 				item.barcode = item.code 
+				if self.price_rule : 
+					#caculate_discount 
+					#check if item has price Rule 
+					codes = self.get_item_to_apply_prcie_rule() or []
+					
+					if item.item in codes :
+						item.has_discount = 1
+						item.price_after_discount = self.caculate_discount()

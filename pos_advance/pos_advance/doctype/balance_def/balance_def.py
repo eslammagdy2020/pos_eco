@@ -16,7 +16,7 @@ class BalanceDef(Document):
 			perfixs = str(self.barcode_fromat).split("-") 
 			for i in perfixs :
 				if i not in  self.valid_types():
-					frappe.thow(f"{i} not accepted ")
+					frappe.throw(f"{i} not accepted ")
 				if i == "b" :
 					length_min = length_min + int(self.balance_code_length or 0)
 				if i == "q" :

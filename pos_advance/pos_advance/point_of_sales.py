@@ -11,17 +11,8 @@ from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
-import json
-from typing import Dict, Optional
-
-import frappe
-from frappe import _
-from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
-from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
-
-import erpnext
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-from erpnext.stock.valuation import FIFOValuation, LIFOValuation
+#from erpnext.stock.utils import scan_barcode
+from pos_advance.utils import scan_barcode
 
 def search_by_term(search_term, warehouse, price_list):
 	result = search_for_serial_or_batch_or_barcode_number(search_term) or {}
@@ -67,7 +58,7 @@ def search_by_term(search_term, warehouse, price_list):
 			"price_list": price_list,
 			"item_code": item_code,
 		},
-		fields=["uom", "currency", "price_list_rate"],
+		fields=["uom", "currency", "price_list_rate" , "1 as qty"],
 	)
 
 	def __sort(p):
@@ -93,97 +84,100 @@ def search_by_term(search_term, warehouse, price_list):
 
 
 @frappe.whitelist()
-def get_items(start, page_length, price_list, item_group, pos_profile, search_term=""):
-	warehouse, hide_unavailable_items = frappe.db.get_value(
-		"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
-	)
+def get_items(start, page_length, price_list, item_group, pos_profile, search_term="" , qty= 1):
+    
+    warehouse, hide_unavailable_items = frappe.db.get_value(
+        "POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
+    )
 
-	result = []
+    result = []
 
-	if search_term:
-		result = search_by_term(search_term, warehouse, price_list) or []
-		if result:
-			return result
+    if search_term:
+        result = search_by_term(search_term, warehouse, price_list) or []
+        if result:
+            return result
 
-	if not frappe.db.exists("Item Group", item_group):
-		item_group = get_root_of("Item Group")
+    if not frappe.db.exists("Item Group", item_group):
+        item_group = get_root_of("Item Group")
 
-	condition = get_conditions(search_term)
-	condition += get_item_group_condition(pos_profile)
+    condition = get_conditions(search_term)
+    condition += get_item_group_condition(pos_profile)
 
-	lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
+    lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 
-	bin_join_selection, bin_join_condition = "", ""
-	if hide_unavailable_items:
-		bin_join_selection = ", `tabBin` bin"
-		bin_join_condition = (
-			"AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
-		)
+    bin_join_selection, bin_join_condition = "", ""
+    if hide_unavailable_items:
+        bin_join_selection = ", `tabBin` bin"
+        bin_join_condition = (
+            "AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
+        )
 
-	items_data = frappe.db.sql(
-		"""
-		SELECT
-			item.name AS item_code,
-			item.item_name,
-			item.description,
-			item.stock_uom,
-			item.image AS item_image,
-			item.is_stock_item
-		FROM
-			`tabItem` item {bin_join_selection}
-		WHERE
-			item.disabled = 0
-			AND item.has_variants = 0
-			AND item.is_sales_item = 1
-			AND item.is_fixed_asset = 0
-			AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
-			AND {condition}
-			{bin_join_condition}
-		ORDER BY
-			item.name asc
-		LIMIT
-			{page_length} offset {start}""".format(
-			start=cint(start),
-			page_length=cint(page_length),
-			lft=cint(lft),
-			rgt=cint(rgt),
-			condition=condition,
-			bin_join_selection=bin_join_selection,
-			bin_join_condition=bin_join_condition,
-		),
-		{"warehouse": warehouse},
-		as_dict=1,
-	)
+    items_data = frappe.db.sql(
+        """
+        SELECT
+            item.name AS item_code,
+            item.item_name,
+            item.description,
+            item.stock_uom,
+            item.image AS item_image,
+            item.is_stock_item
+        FROM
+            `tabItem` item {bin_join_selection}
+        WHERE
+            item.disabled = 0
+            AND item.has_variants = 0
+            AND item.is_sales_item = 1
+            AND item.is_fixed_asset = 0
+            AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+            AND {condition}
+            {bin_join_condition}
+        ORDER BY
+            item.name asc
+        LIMIT
+            {page_length} offset {start}""".format(
+            start=cint(start),
+            page_length=cint(page_length),
+            lft=cint(lft),
+            rgt=cint(rgt),
+            condition=condition,
+            bin_join_selection=bin_join_selection,
+            bin_join_condition=bin_join_condition,
+        ),
+        {"warehouse": warehouse},
+        as_dict=1,
+    )
 
-	if items_data:
-		items = [d.item_code for d in items_data]
-		item_prices_data = frappe.get_all(
-			"Item Price",
-			fields=["item_code", "price_list_rate", "currency"],
-			filters={"price_list": price_list, "item_code": ["in", items]},
-		)
+    if items_data:
+        items = [d.item_code for d in items_data]
+        item_prices_data = frappe.get_all(
+            "Item Price",
+            fields=["item_code", "price_list_rate", "currency" ] ,
+            filters={"price_list": price_list, "item_code": ["in", items]},
+        )
+        
+        item_prices = {}
+        for d in item_prices_data:
+            d["qty"] = 1 
+            item_prices[d.item_code] = d
 
-		item_prices = {}
-		for d in item_prices_data:
-			item_prices[d.item_code] = d
+        for item in items_data:
+            item_code = item.item_code
+            item_price = item_prices.get(item_code) or {}
+            item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 
-		for item in items_data:
-			item_code = item.item_code
-			item_price = item_prices.get(item_code) or {}
-			item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+            row = {}
+            row.update(item)
+            row.update(
+                {
+                    "price_list_rate": item_price.get("price_list_rate"),
+                    "currency": item_price.get("currency"),
+                    "actual_qty": item_stock_qty,
+                    "qty" : qty 
+                }
+            )
+            result.append(row)
 
-			row = {}
-			row.update(item)
-			row.update(
-				{
-					"price_list_rate": item_price.get("price_list_rate"),
-					"currency": item_price.get("currency"),
-					"actual_qty": item_stock_qty,
-				}
-			)
-			result.append(row)
-
-	return {"items": result}
+    return {"items": result}
 
 
 @frappe.whitelist()
@@ -354,162 +348,3 @@ def get_pos_profile_data(pos_profile):
 
 	pos_profile.customer_groups = _customer_groups_with_children
 	return pos_profile
-
-
-
-
-
-
-
-
-BarcodeScanResult = Dict[str, Optional[str]]
-
-
-
-@frappe.whitelist()
-def scan_barcode(search_value: str) -> BarcodeScanResult:
-    
-	def set_cache(data: BarcodeScanResult):
-		
-		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
-
-	def get_cache() -> Optional[BarcodeScanResult]:
-		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
-			return data
-
-	if scan_data := get_cache():
-		return scan_data
-
-	# search barcode no
-	
-	barcode_data = frappe.db.get_value(
-		"Item Barcode",
-		{"barcode": search_value},
-		["barcode", "parent as item_code", "uom" , "5 as qty"],
-		as_dict=True,
-	)
-
-	if barcode_data:
-
-		_update_item_info(barcode_data)
-		set_cache(barcode_data)
-		return barcode_data
-	if not barcode_data :
-		#try cath balance data 
-		#get Active Balance 
-		active_balance = get_active_balance() 
-		if active_balance and len(active_balance) > 0 :
-			for i in active_balance :
-				balance = frappe.get_doc("Balance Def" , i.get('name'))
-				if len(search_value) >= int(balance.barcode_min_length) :
-					#get logic here 
-					d = convert_baroce_to_valid_data(balance , search_value)
-					if d :
-						barcode_data = frappe.db.get_value(
-										"Item Barcode",
-										{"barcode": d},
-										["barcode", "parent as item_code", "uom"],
-										as_dict=True,
-									)
-						if barcode_data:
-							_update_item_info(barcode_data)
-							set_cache(barcode_data)
-							return barcode_data
-					
-				
-		print("value to sreach  --" ,search_value)
-		
-	# search serial no
-	serial_no_data = frappe.db.get_value(
-		"Serial No",
-		search_value,
-		["name as serial_no", "item_code", "batch_no"],
-		as_dict=True,
-	)
-	if serial_no_data:
-		_update_item_info(serial_no_data)
-		set_cache(serial_no_data)
-		return serial_no_data
-
-	# search batch no
-	batch_no_data = frappe.db.get_value(
-		"Batch",
-		search_value,
-		["name as batch_no", "item as item_code"],
-		as_dict=True,
-	)
-	if batch_no_data:
-		_update_item_info(batch_no_data)
-		set_cache(batch_no_data)
-		return batch_no_data
-
-	return {}
-
-
-def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
-	if item_code := scan_result.get("item_code"):
-		if item_info := frappe.get_cached_value(
-			"Item",
-			item_code,
-			["has_batch_no", "has_serial_no"],
-			as_dict=True,
-		):
-		
-			scan_result.update(item_info)
-	print("Info--------------" ,scan_result)
-	return scan_result
-
-
-
-def get_active_balance() :
-	data  = frappe.cache().get_value(f"posadvanc_active_balance")
-	if not data :
-		active_balance = frappe.db.sql("""SELECT name FROM `tabBalance Def`  WHERE active = 1 """ ,as_dict = True)
-		data = active_balance
-		frappe.cache().set_value(f"posadvanc_active_balance", 
-					  data  , expires_in_sec= 240 )
-
-	return data				  
-
-
-
-
-def convert_baroce_to_valid_data(balance , bacrode):
-	item_start = 1
-	qty = 0
-	start_in = 0 
-	end_in = 0 
-	start_in_qty = 0 
-	end_in_qty = 0 
-	perfixs = str(balance.barcode_fromat).split('-')
-	for i in perfixs :
-		#find code 
-		if i == "b" and item_start:
-			#get b length 
-			start_in = start_in + int(balance.balance_code_length or 0 )
-			#start_in_qty = start_in_qty + int(balance.balance_code_length or 0 )
-		if i == 'u' and item_start :
-			start_in = start_in + int(balance.uom_code_length or 0 )
-			#start_in_qty = start_in_qty + int(balance.balance_code_length or 0 )
-		if i =='q'and item_start  :
-			start_in = start_in + int(balance.qty_code_length)
-		if i == 'i': 
-			item_start = 0 
-		if i == "b" and not item_start:
-			#get b length 
-			end_in = end_in + int(balance.balance_code_length or 0 )
-		if i == 'u' and not item_start :
-			end_in = end_in + int(balance.uom_code_length or 0 )
-		if i =='q'and not item_start  :
-			end_in = end_in + int(balance.qty_code_length)
-
-	item_bacode = bacrode[start_in:-end_in]
-	print(item_bacode)
-	return item_bacode 
-
-
-		
-		
-
-
-	

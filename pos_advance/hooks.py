@@ -103,7 +103,7 @@ override_whitelisted_methods = {
 }
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
+# } /erpnext.stock.get_item_details.get_item_details
 #
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",

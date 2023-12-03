@@ -416,7 +416,7 @@
       let { item_group, pos_profile } = this;
       !item_group && (item_group = this.parent_item_group);
       return frappe.call({
-        method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+        method: "pos_advance.pos_advance.point_of_sales.get_items",
         freeze: true,
         args: { start, page_length, price_list, item_group, search_term, pos_profile }
       });
@@ -466,7 +466,7 @@
       return `<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
-				data-rate="${escape(price_list_rate || 0)}"
+				data-rate="${escape(price_list_rate || 0)}"  data-qty="${escape(qty) || 2}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -585,13 +585,14 @@
         let serial_no = unescape($item.attr("data-serial-no"));
         let uom = unescape($item.attr("data-uom"));
         let rate = unescape($item.attr("data-rate"));
+        let qty2 = unescape($item.attr("data-qty"));
         batch_no = batch_no === "undefined" ? void 0 : batch_no;
         serial_no = serial_no === "undefined" ? void 0 : serial_no;
         uom = uom === "undefined" ? void 0 : uom;
         rate = rate === "undefined" ? void 0 : rate;
         me.events.item_selected({
           field: "qty",
-          value: "+1",
+          value: qty2,
           item: { item_code, batch_no, serial_no, uom, rate }
         });
         me.search_field.set_focus();
@@ -1858,13 +1859,13 @@
     bind_auto_serial_fetch_event() {
       this.$form_container.on("click", ".auto-fetch-btn", () => {
         this.batch_no_control && this.batch_no_control.set_value("");
-        let qty = this.qty_control.get_value();
+        let qty2 = this.qty_control.get_value();
         let conversion_factor = this.conversion_factor_control.get_value();
         let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
         let numbers = frappe.call({
           method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
           args: {
-            qty: qty * conversion_factor,
+            qty: qty2 * conversion_factor,
             item_code: this.current_item.item_code,
             warehouse: this.warehouse_control.get_value() || "",
             batch_nos: this.current_item.batch_no || "",
@@ -1879,7 +1880,7 @@
             const warehouse = this.warehouse_control.get_value().bold();
             const item_code = this.current_item.item_code.bold();
             frappe.msgprint(__("Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.", [item_code, warehouse]));
-          } else if (records_length < qty) {
+          } else if (records_length < qty2) {
             frappe.msgprint(__("Fetched only {0} available serial numbers.", [records_length]));
             this.qty_control.set_value(records_length);
           }
@@ -3512,4 +3513,4 @@ Return`,
     }
   };
 })();
-//# sourceMappingURL=point-of-sale-advance.bundle.LBL6EN4K.js.map
+//# sourceMappingURL=point-of-sale-advance.bundle.UUXG2TBY.js.map

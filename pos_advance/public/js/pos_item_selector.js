@@ -59,7 +59,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+			method:  "pos_advance.pos_advance.point_of_sales.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
@@ -119,7 +119,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
-				data-rate="${escape(price_list_rate || 0)}"
+				data-rate="${escape(price_list_rate || 0)}"  data-qty="${escape(qty) || 2 }"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -250,6 +250,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
 			let rate = unescape($item.attr('data-rate'));
+			let qty =  unescape($item.attr('data-qty'));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
@@ -259,7 +260,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 			me.events.item_selected({
 				field: 'qty',
-				value: "+1",
+				value: qty,
 				item: { item_code, batch_no, serial_no, uom, rate }
 			});
 			me.search_field.set_focus();

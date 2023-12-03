@@ -385,7 +385,7 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 	barcode_data = frappe.db.get_value(
 		"Item Barcode",
 		{"barcode": search_value},
-		["barcode", "parent as item_code", "uom" , "5 as qty"],
+		["barcode", "parent as item_code", "uom"  ],
 		as_dict=True,
 	)
 

@@ -58,7 +58,7 @@ def search_by_term(search_term, warehouse, price_list):
 			"price_list": price_list,
 			"item_code": item_code,
 		},
-		fields=["uom", "currency", "price_list_rate" , "1 as qty"],
+		fields=["uom", "currency", "price_list_rate" ],
 	)
 
 	def __sort(p):
@@ -85,99 +85,100 @@ def search_by_term(search_term, warehouse, price_list):
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, pos_profile, search_term="" , qty= 1):
-    
-    warehouse, hide_unavailable_items = frappe.db.get_value(
-        "POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
-    )
 
-    result = []
+	warehouse, hide_unavailable_items = frappe.db.get_value(
+		"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
+	)
 
-    if search_term:
-        result = search_by_term(search_term, warehouse, price_list) or []
-        if result:
-            return result
+	result = []
 
-    if not frappe.db.exists("Item Group", item_group):
-        item_group = get_root_of("Item Group")
+	if search_term:
+		result = search_by_term(search_term, warehouse, price_list) or []
+		if result:
+			return result
 
-    condition = get_conditions(search_term)
-    condition += get_item_group_condition(pos_profile)
+	if not frappe.db.exists("Item Group", item_group):
+		item_group = get_root_of("Item Group")
 
-    lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
+	condition = get_conditions(search_term)
+	condition += get_item_group_condition(pos_profile)
 
-    bin_join_selection, bin_join_condition = "", ""
-    if hide_unavailable_items:
-        bin_join_selection = ", `tabBin` bin"
-        bin_join_condition = (
-            "AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
-        )
+	lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 
-    items_data = frappe.db.sql(
-        """
-        SELECT
-            item.name AS item_code,
-            item.item_name,
-            item.description,
-            item.stock_uom,
-            item.image AS item_image,
-            item.is_stock_item
-        FROM
-            `tabItem` item {bin_join_selection}
-        WHERE
-            item.disabled = 0
-            AND item.has_variants = 0
-            AND item.is_sales_item = 1
-            AND item.is_fixed_asset = 0
-            AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
-            AND {condition}
-            {bin_join_condition}
-        ORDER BY
-            item.name asc
-        LIMIT
-            {page_length} offset {start}""".format(
-            start=cint(start),
-            page_length=cint(page_length),
-            lft=cint(lft),
-            rgt=cint(rgt),
-            condition=condition,
-            bin_join_selection=bin_join_selection,
-            bin_join_condition=bin_join_condition,
-        ),
-        {"warehouse": warehouse},
-        as_dict=1,
-    )
+	bin_join_selection, bin_join_condition = "", ""
+	if hide_unavailable_items:
+		bin_join_selection = ", `tabBin` bin"
+		bin_join_condition = (
+			"AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
+		)
 
-    if items_data:
-        items = [d.item_code for d in items_data]
-        item_prices_data = frappe.get_all(
-            "Item Price",
-            fields=["item_code", "price_list_rate", "currency" ] ,
-            filters={"price_list": price_list, "item_code": ["in", items]},
-        )
-        
-        item_prices = {}
-        for d in item_prices_data:
-            d["qty"] = 1 
-            item_prices[d.item_code] = d
+	items_data = frappe.db.sql(
+		"""
+		SELECT
+			item.name AS item_code,
+			item.item_name,
+			item.description,
+			item.stock_uom,
+			item.image AS item_image,
+			item.is_stock_item
+		FROM
+			`tabItem` item {bin_join_selection}
+		WHERE
+			item.disabled = 0
+			AND item.has_variants = 0
+			AND item.is_sales_item = 1
+			AND item.is_fixed_asset = 0
+			AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+			AND {condition}
+			{bin_join_condition}
+		ORDER BY
+			item.name asc
+		LIMIT
+			{page_length} offset {start}""".format(
+			start=cint(start),
+			page_length=cint(page_length),
+			lft=cint(lft),
+			rgt=cint(rgt),
+			condition=condition,
+			bin_join_selection=bin_join_selection,
+			bin_join_condition=bin_join_condition,
+		),
+		{"warehouse": warehouse},
+		as_dict=1,
+	)
 
-        for item in items_data:
-            item_code = item.item_code
-            item_price = item_prices.get(item_code) or {}
-            item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+	if items_data:
+			items = [d.item_code for d in items_data]
+			item_prices_data = frappe.get_all(
+				"Item Price",
+				fields=["item_code", "price_list_rate", "currency" ] ,
+				filters={"price_list": price_list, "item_code": ["in", items]},
+			)
 
-            row = {}
-            row.update(item)
-            row.update(
-                {
-                    "price_list_rate": item_price.get("price_list_rate"),
-                    "currency": item_price.get("currency"),
-                    "actual_qty": item_stock_qty,
-                    "qty" : qty 
-                }
-            )
-            result.append(row)
+			item_prices = {}
+			for d in item_prices_data:
+				d["qty"] = 1 
+				item_prices[d.item_code] = d
 
-    return {"items": result}
+			for item in items_data:
+				item_code = item.item_code
+				item_price = item_prices.get(item_code) or {}
+				item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+
+				row = {}
+				row.update(item)
+				row.update(
+					{
+						"price_list_rate": item_price.get("price_list_rate"),
+						"currency": item_price.get("currency"),
+						"actual_qty": item_stock_qty,
+						"qty" : qty 
+					}
+				)
+				print(row)
+				result.append(row)
+
+	return {"items": result}
 
 
 @frappe.whitelist()

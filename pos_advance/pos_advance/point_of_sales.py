@@ -45,12 +45,14 @@ def search_by_term(search_term, warehouse, price_list):
 				{
 					"uom": barcode_info.uom,
 					"conversion_factor": uom.get("conversion_factor", 1),
+					"qty" :17
 				}
 			)
 
 	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
 	item.update({"actual_qty": item_stock_qty})
+	# item.update({"Qty" : "5"})
 
 	price = frappe.get_list(
 		doctype="Item Price",
@@ -80,6 +82,7 @@ def search_by_term(search_term, warehouse, price_list):
 				"price_list_rate": p.get("price_list_rate"),
 			}
 		)
+	print(item)
 	return {"items": [item]}
 
 

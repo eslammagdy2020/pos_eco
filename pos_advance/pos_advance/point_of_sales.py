@@ -20,6 +20,7 @@ def search_by_term(search_term, warehouse, price_list):
 	serial_no = result.get("serial_no", "")
 	batch_no = result.get("batch_no", "")
 	barcode = result.get("barcode", "")
+	qty = result.get("qty", "")
 	if not result:
 		return
 	item_doc = frappe.get_doc("Item", item_code)
@@ -40,14 +41,17 @@ def search_by_term(search_term, warehouse, price_list):
 	if barcode:
 		barcode_info = next(filter(lambda x: x.barcode == barcode, item_doc.get("barcodes", [])), None)
 		if barcode_info and barcode_info.uom:
+			# print("Bar Code Data " ,barcode_info)
 			uom = next(filter(lambda x: x.uom == barcode_info.uom, item_doc.uoms), {})
 			item.update(
 				{
 					"uom": barcode_info.uom,
 					"conversion_factor": uom.get("conversion_factor", 1),
-					"qty" :17
+					"qty":qty
+					
 				}
 			)
+			print("UPDATE___ITEM" ,item)
 
 	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
@@ -160,7 +164,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 			item_prices = {}
 			for d in item_prices_data:
-				d["qty"] = 1 
+				
 				item_prices[d.item_code] = d
 
 			for item in items_data:
@@ -175,7 +179,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 						"price_list_rate": item_price.get("price_list_rate"),
 						"currency": item_price.get("currency"),
 						"actual_qty": item_stock_qty,
-						"qty" : qty 
+						
 					}
 				)
 				print(row)

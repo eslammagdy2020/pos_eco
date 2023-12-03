@@ -371,7 +371,7 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
     
 	def set_cache(data: BarcodeScanResult):
 		
-		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
+		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=10)
 
 	def get_cache() -> Optional[BarcodeScanResult]:
 		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
@@ -404,14 +404,17 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 				if len(search_value) >= int(balance.barcode_min_length) :
 					#get logic here 
 					d = convert_baroce_to_valid_data(balance , search_value)
+					
 					if d :
 						barcode_data = frappe.db.get_value(
 										"Item Barcode",
-										{"barcode": d},
+										{"barcode": d.get("barcode")} , 
 										["barcode", "parent as item_code", "uom"],
 										as_dict=True,
 									)
+						barcode_data.update( {"qty" : d.get("qty")})
 						if barcode_data:
+							print("Update INFO" , barcode_data)
 							_update_item_info(barcode_data)
 							set_cache(barcode_data)
 							return barcode_data
@@ -502,9 +505,9 @@ def convert_baroce_to_valid_data(balance , bacrode):
 			end_in = end_in + int(balance.uom_code_length or 0 )
 		if i =='q'and not item_start  :
 			end_in = end_in + int(balance.qty_code_length)
-
-	item_bacode = bacrode[start_in:-end_in]
-	print(item_bacode)
+	qty =bacrode[-4:]
+	item_bacode = {"barcode" :bacrode[start_in:-end_in] , "qty"  :qty}
+	# print(item_bacode)
 	return item_bacode 
 
 
